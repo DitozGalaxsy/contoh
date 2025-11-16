@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ditozz Galaxy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Efek bintang jatuh */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            from {
+                transform: translateY(-100vh);
+            }
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        /* Container utama */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Loading screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-circle {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Animasi teks */
+        .welcome-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .welcome-line {
+            display: flex;
+            justify-content: center;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .welcome-to-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+            line-height: 1.3;
+            margin-bottom: 5px;
+        }
+
+        .welcome-to-text span {
+            display: inline-block;
+            opacity: 0;
+            animation: typeIn 0.1s forwards;
+            margin-right: 4px;
+        }
+
+        .ditozz-text {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-shadow: 0 0 12px rgba(106, 17, 203, 0.7);
+            line-height: 1.3;
+            color: #b19cd9;
+            margin-top: 25px;
+        }
+
+        .ditozz-text span {
+            display: inline-block;
+            opacity: 0;
+            animation: typeIn 0.1s forwards;
+            margin-right: 5px;
+        }
+
+        @keyframes typeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Konten utama */
+        .main-content {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 35px;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .main-content.visible {
+            display: flex;
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .profile-pic {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #fff;
+            box-shadow: 0 0 20px rgba(106, 17, 203, 0.5);
+            transition: transform 0.3s ease;
+            background-color: #333;
+        }
+
+        .profile-pic.loading {
+            background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        .profile-pic.error {
+            background-color: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.8rem;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 2px;
+        }
+
+        .payment-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .payment-title {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        .payment-button {
+            display: inline-block;
+            padding: 10px 25px;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .payment-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(106, 17, 203, 0.5);
+            background: linear-gradient(45deg, #2575fc, #6a11cb);
+        }
+
+        /* Fallback image section */
+        .fallback-image {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border: 3px solid #fff;
+            box-shadow: 0 0 20px rgba(106, 17, 203, 0.5);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            padding: 15px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 1px;
+        }
+
+        /* Error message */
+        .error-message {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Efek bintang jatuh -->
+    <div class="stars" id="stars"></div>
+    
+    <!-- Loading screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-circle"></div>
+        <p>Loading...</p>
+    </div>
+    
+    <div class="container">
+        <!-- Container untuk teks welcome -->
+        <div class="welcome-container" id="welcomeContainer">
+            <!-- Baris pertama: WELCOME TO -->
+            <div class="welcome-line">
+                <div class="welcome-to-text" id="welcomeToText"></div>
+            </div>
+            <!-- Baris kedua: DITOZZ || GALAXY -->
+            <div class="welcome-line">
+                <div class="ditozz-text" id="ditozzText"></div>
+            </div>
+        </div>
+        
+        <!-- Konten utama -->
+        <div class="main-content" id="mainContent">
+            <div class="profile-section">
+                <!-- Gambar utama dengan URL baru -->
+                <img 
+                    src="https://i.top4top.io/p_3605uz4ij1.jpg"Profile Picture Ditozz Galaxy" 
+                    class="profile-pic loading"
+                    id="profileImage"
+                    onload="imageLoaded()"
+                    onerror="imageError()"
+                >
+                <!-- Fallback jika gambar gagal -->
+                <div class="fallback-image" id="fallbackImage" style="display: none;">
+                    DZ
+                </div>
+                <h2 class="profile-name">Ditozz Galaxy</h2>
+            </div>
+            
+            <div class="payment-section">
+                <h2 class="payment-title">Payment</h2>
+                <a href="https://peyment.ditozzgalaxy.my.id" class="payment-button" target="_blank">Go to Payment</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            &copy; 2023 Ditozz Galaxy. All rights reserved.
+        </div>
+    </div>
+
+    <script>
+        // Fungsi untuk menangani loading gambar
+        function imageLoaded() {
+            const profileImage = document.getElementById('profileImage');
+            profileImage.classList.remove('loading');
+            console.log('Gambar berhasil dimuat!');
+        }
+
+        function imageError() {
+            const profileImage = document.getElementById('profileImage');
+            const fallbackImage = document.getElementById('fallbackImage');
+            
+            console.log('Gagal memuat gambar, menampilkan fallback...');
+            profileImage.style.display = 'none';
+            profileImage.classList.remove('loading');
+            profileImage.classList.add('error');
+            fallbackImage.style.display = 'flex';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Membuat efek bintang jatuh
+            const starsContainer = document.getElementById('stars');
+            const starCount = 80;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // Posisi acak
+                const left = Math.random() * 100;
+                const top = Math.random() * 100;
+                
+                // Animasi acak
+                const duration = 3 + Math.random() * 10;
+                const delay = Math.random() * 5;
+                
+                star.style.left = `${left}%`;
+                star.style.top = `${top}%`;
+                star.style.animationDuration = `${duration}s`;
+                star.style.animationDelay = `${delay}s`;
+                
+                starsContainer.appendChild(star);
+            }
+            
+            // Animasi loading dan teks
+            const loadingScreen = document.getElementById('loadingScreen');
+            const welcomeToText = document.getElementById('welcomeToText');
+            const ditozzText = document.getElementById('ditozzText');
+            const mainContent = document.getElementById('mainContent');
+            
+            // Teks yang akan dianimasikan
+            const welcomeToLine = "WELCOME TO";
+            const ditozzLine = "DITOZZ || GALAXY";
+            
+            // Fungsi untuk mengetik teks baris pertama (WELCOME TO)
+            function typeWelcomeToText() {
+                let i = 0;
+                const typingInterval = setInterval(() => {
+                    if (i < welcomeToLine.length) {
+                        const span = document.createElement('span');
+                        span.textContent = welcomeToLine[i];
+                        welcomeToText.appendChild(span);
+                        i++;
+                    } else {
+                        clearInterval(typingInterval);
+                        
+                        // Setelah selesai, mulai mengetik baris kedua
+                        setTimeout(() => {
+                            typeDitozzText();
+                        }, 500);
+                    }
+                }, 100);
+            }
+            
+            // Fungsi untuk mengetik teks baris kedua (DITOZZ || GALAXY)
+            function typeDitozzText() {
+                let i = 0;
+                const typingInterval = setInterval(() => {
+                    if (i < ditozzLine.length) {
+                        const span = document.createElement('span');
+                        span.textContent = ditozzLine[i];
+                        ditozzText.appendChild(span);
+                        i++;
+                    } else {
+                        clearInterval(typingInterval);
+                        
+                        // Tunggu 3 detik sebelum menghapus semua teks
+                        setTimeout(() => {
+                            deleteAllText();
+                        }, 3000);
+                    }
+                }, 100);
+            }
+            
+            // Fungsi untuk menghapus semua teks
+            function deleteAllText() {
+                const welcomeToSpans = welcomeToText.querySelectorAll('span');
+                const ditozzSpans = ditozzText.querySelectorAll('span');
+                
+                let i = ditozzSpans.length - 1;
+                let j = welcomeToSpans.length - 1;
+                
+                const deletingInterval = setInterval(() => {
+                    // Hapus dari baris kedua terlebih dahulu
+                    if (i >= 0) {
+                        ditozzSpans[i].remove();
+                        i--;
+                    } 
+                    // Kemudian hapus dari baris pertama
+                    else if (j >= 0) {
+                        welcomeToSpans[j].remove();
+                        j--;
+                    }
+                    // Selesai menghapus semua
+                    else {
+                        clearInterval(deletingInterval);
+                        
+                        // Tampilkan konten utama
+                        mainContent.classList.add('visible');
+                    }
+                }, 50);
+            }
+            
+            // Simulasi loading selama 2 detik
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+                typeWelcomeToText();
+            }, 2000);
+
+            // Preload gambar untuk memastikan bisa dimuat
+            const img = new Image();
+            img.src = "https://telegra.ph/file/850f677b320cb711f47d3-1bdee306c4d230757d.jpg";
+            img.onload = function() {
+                console.log('Gambar siap ditampilkan');
+            }
+            img.onerror = function() {
+                console.log('Gagal memuat gambar dari URL yang diberikan');
+            }
+        });
+    </script>
+</body>
+</html>
